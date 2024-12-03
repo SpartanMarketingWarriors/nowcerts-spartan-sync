@@ -1,5 +1,12 @@
 require('dotenv').config();
 
+const subaccounts = process.env.GHL_SUBACCOUNTS ? 
+  JSON.parse(process.env.GHL_SUBACCOUNTS) : 
+  [{
+    locationId: process.env.GHL_LOCATION_ID,
+    apiKey: process.env.GHL_API_KEY
+  }];
+
 module.exports = {
   nowcerts: {
     apiUrl: process.env.NOWCERTS_API_URL,
@@ -8,11 +15,6 @@ module.exports = {
   },
   ghl: {
     apiUrl: process.env.GHL_API_URL,
-    apiKey: process.env.GHL_API_KEY,
-    locationId: process.env.GHL_LOCATION_ID
-  },
-  server: {
-    port: process.env.PORT || 3000,
-    env: process.env.NODE_ENV || 'development'
+    subaccounts
   }
 };
