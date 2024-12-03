@@ -2,11 +2,17 @@ const axios = require('axios');
 const config = require('../config');
 
 class NowCertsAPI {
-  constructor() {
+  constructor(agencyId) {
+    const account = config.nowcerts.accounts.find(a => a.agencyId === agencyId);
+    if (!account) {
+      throw new Error(`No configuration found for agency ID: ${agencyId}`);
+    }
+
+    this.agencyId = agencyId;
     this.client = axios.create({
       baseURL: config.nowcerts.apiUrl,
       headers: {
-        'Authorization': `Bearer ${config.nowcerts.apiKey}`,
+        'Authorization': `Bearer ${account.apiKey}`,
         'Content-Type': 'application/json'
       }
     });
@@ -15,7 +21,7 @@ class NowCertsAPI {
   async createContact(data) {
     const response = await this.client.post('/contacts', {
       ...data,
-      agencyId: config.nowcerts.agencyId
+      agencyId: this.agencyId
     });
     return response.data;
   }
@@ -30,10 +36,11 @@ class NowCertsAPI {
     return response.data;
   }
 
-  async getContact(contactId) {
-    const response = await this.client.get(`/contacts/${contactId}`);
-    return response.data;
+  static getInstanceForGHL(locationId) {
+    const subaccount = config.ghl.subaccounts.find(s => s.locationId === locationId);
+    if (!subaccount) {
+      throw new Error(`No configuration found for GHL location ID: ${locationId}`);
+    }
+    return new NowCertsAPI(subaccount.nowcertsAgencyId);
   }
 }
-
-module.exports = new NowCertsAPI();
