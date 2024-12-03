@@ -2,11 +2,17 @@ const axios = require('axios');
 const config = require('../config');
 
 class GHLAPI {
-  constructor() {
+  constructor(locationId) {
+    const subaccount = config.ghl.subaccounts.find(s => s.locationId === locationId);
+    if (!subaccount) {
+      throw new Error(`No configuration found for location ID: ${locationId}`);
+    }
+
+    this.locationId = locationId;
     this.client = axios.create({
       baseURL: config.ghl.apiUrl,
       headers: {
-        'Authorization': `Bearer ${config.ghl.apiKey}`,
+        'Authorization': `Bearer ${subaccount.apiKey}`,
         'Content-Type': 'application/json'
       }
     });
@@ -15,7 +21,7 @@ class GHLAPI {
   async getContactsByTag(tag) {
     const response = await this.client.get('/contacts', {
       params: {
-        locationId: config.ghl.locationId,
+        locationId: this.locationId,
         tags: tag
       }
     });
@@ -27,10 +33,9 @@ class GHLAPI {
     return response.data;
   }
 
-  async updateContact(contactId, data) {
-    const response = await this.client.put(`/contacts/${contactId}`, data);
-    return response.data;
+  static getInstances() {
+    return config.ghl.subaccounts.map(({locationId}) => new GHLAPI(locationId));
   }
 }
 
-module.exports = new GHLAPI();
+module.exports = GHLAPI;
