@@ -3,7 +3,7 @@ const { useState } = React;
 function AccountManager() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState('');
-  const correctPassword = 'your-secure-password'; // Change this
+  const correctPassword = '9$KN9Gi7w7h7';
 
   const handleLogin = (e) => {
     e.preventDefault();
